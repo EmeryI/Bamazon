@@ -18,7 +18,6 @@ var connection = mysql.createConnection({
 connection.connect(function(err) {
     if (err) throw err;
     displayItems();
-    searchProduct();
 });
 
 function displayItems() {
@@ -29,7 +28,7 @@ function displayItems() {
             console.log(res[i].product_name);
             console.log(res[i].price);
         }
-
+        searchProduct();
     });
 
 }
@@ -43,19 +42,13 @@ function searchProduct() {
         })
         .then(function(answer) {
             console.log(answer);
-            var query = "SELECT * FROM bamazon_db.products WHERE item_id=" + answer.item_id;
-            connection.query(query, function(err, res) {
-                console.log(res);
-                // for (var i = 0; i < res.length; i++) {
-                //   console.log("Position: " + res[i].position + " || Song: " + res[i].song + " || Year: " + res[i].year);
-                // }
-                // runSearch();
-            });
+
+            productQuantity(answer.item_id);
         });
-    productQuantity();
+
 }
 
-function productQuantity() {
+function productQuantity(id) {
     inquirer
         .prompt({
             name: "stock_quantity",
@@ -64,13 +57,17 @@ function productQuantity() {
         })
         .then(function(answer) {
             console.log(answer);
-            // var query = "SELECT * FROM bamazon_db.products WHERE item_id=" + answer.item_id;
-            // connection.query(query, function(err, res) {
-            //     console.log(res);
-            //     // for (var i = 0; i < res.length; i++) {
-            //     //   console.log("Position: " + res[i].position + " || Song: " + res[i].song + " || Year: " + res[i].year);
-            //     // }
-            //     // runSearch();
-            // });
+            var query = "SELECT * FROM bamazon_db.products WHERE item_id=" + id
+            connection.query(query, function(err, res) {
+                console.log(res[0].stock_quantity);
+                if (answer.stock_quantity <= res[0].stock_quantity) {
+
+                    console.log("IN Stock!!! Placing Order");
+                    console.log("Order Placed!! Billing Amount is : $ " + answer.stock_quantity * res[0].price)
+                } else {
+                    console.log("Insufficent Qty!! search other product")
+                }
+                // runSearch();
+            });
         });
 }
